@@ -16,10 +16,15 @@ const RIGHT_WALL: f32 = 450.;
 const BOTTOM_WALL: f32 = -300.;
 const TOP_WALL: f32 = 300.;
 
+const SCOREBOARD_FONT_SIZE: f32 = 40.0;
+const SCOREBOARD_TEXT_PADDING: Val = Val::Px(5.0);
+const TEXT_COLOR: Color = Color::rgb(0.5, 0.5, 1.0);
+const SCORE_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 
 fn main() {
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
+        .insert_resource(Scoreboard { score: 0 })
         .add_plugins((DefaultPlugins, ))
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (move_player, spawn_car, apply_velocity))
@@ -39,6 +44,11 @@ struct SpawnTimer(Timer);
 #[derive(Component, Deref, DerefMut)]
 struct Velocity(Vec2);
 
+#[derive(Resource)]
+struct Scoreboard {
+    score: usize,
+}
+
 fn setup(
     mut commands: Commands,
 ) {
@@ -54,6 +64,29 @@ fn setup(
         transform: Transform::from_translation(Vec3::new(-50., BOTTOM_WALL + 20.0, 0.)),
         ..default()
     }, Player));
+    commands.spawn(
+        TextBundle::from_sections([
+            TextSection::new(
+                "Score: ",
+                TextStyle {
+                    font_size: SCOREBOARD_FONT_SIZE,
+                    color: TEXT_COLOR,
+                    ..default()
+                },
+            ),
+            TextSection::from_style(TextStyle {
+                font_size: SCOREBOARD_FONT_SIZE,
+                color: SCORE_COLOR,
+                ..default()
+            }),
+        ])
+            .with_style(Style {
+                position_type: PositionType::Absolute,
+                top: SCOREBOARD_TEXT_PADDING,
+                left: SCOREBOARD_TEXT_PADDING,
+                ..default()
+            }),
+    );
 }
 
 fn spawn_car(
