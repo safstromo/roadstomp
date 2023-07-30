@@ -1,4 +1,6 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::{prelude::*,
+           sprite::collide_aabb::{collide, Collision},
+           sprite::MaterialMesh2dBundle};
 use rand::Rng;
 
 const PLAYER_SPEED: f32 = 500.0;
@@ -25,17 +27,25 @@ fn main() {
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
         .insert_resource(Scoreboard { score: 0 })
+        .add_event::<CollisionEvent>()
         .add_plugins((DefaultPlugins, ))
         .add_systems(Startup, setup)
-        .add_systems(FixedUpdate, (move_player, spawn_car, apply_velocity))
-
+        .add_systems(FixedUpdate, (
+            spawn_car,
+            check_for_collisions,
+            apply_velocity.before(check_for_collisions),
+            move_player
+                .before(check_for_collisions)
+                .after(apply_velocity),
+        ))
+        .add_systems(Update, (update_scoreboard, bevy::window::close_on_esc))
         .run();
 }
 
 #[derive(Component)]
 struct Player;
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 struct Car;
 
 #[derive(Resource)]
@@ -48,6 +58,13 @@ struct Velocity(Vec2);
 struct Scoreboard {
     score: usize,
 }
+
+#[derive(Component)]
+struct Collider;
+
+#[derive(Event, Default)]
+struct CollisionEvent;
+
 
 fn setup(
     mut commands: Commands,
@@ -63,7 +80,10 @@ fn setup(
         },
         transform: Transform::from_translation(Vec3::new(-50., BOTTOM_WALL + 20.0, 0.)),
         ..default()
-    }, Player));
+    },
+                    Player,
+                    Collider,
+    ));
     commands.spawn(
         TextBundle::from_sections([
             TextSection::new(
@@ -106,7 +126,8 @@ fn spawn_car(
                 transform: Transform::from_translation(Vec3::new(rng.gen_range(LEFT_WALL..RIGHT_WALL), TOP_WALL, 1.)),
                 ..default()
             }, Car,
-             Velocity(INITIAL_CAR_DIRECTION.normalize() * CAR_SPEED)
+             Velocity(INITIAL_CAR_DIRECTION.normalize() * CAR_SPEED),
+             Collider
             ));
     }
 }
@@ -144,4 +165,35 @@ fn move_player(
     let right_bound = RIGHT_WALL - WALL_THICKNESS / 2.0 - PLAYER_SIZE.x / 2.0 - PLAYER_PADDING;
 
     player_transform.translation.x = new_player_position.clamp(left_bound, right_bound);
+}
+
+fn check_for_collisions(
+    mut commands: Commands,
+    mut scoreboard: ResMut<Scoreboard>,
+    mut player_query: Query<(Entity, &Transform), With<Player>>,
+    collider_query: Query<(Entity, &Transform), With<Car>>,
+    mut collision_events: EventWriter<CollisionEvent>,
+) {
+    let (player_entity, player_transform) = player_query.single_mut();
+
+
+    for (car_entity, car_transform) in collider_query.iter() {
+        if collide(player_transform.translation,
+                   PLAYER_SIZE,
+                   car_transform.translation,
+                   CAR_SIZE).is_some() {
+            scoreboard.score += 1;
+            collision_events.send_default();
+            commands.entity(car_entity).despawn();
+        }
+
+        if car_transform.translation.y <= BOTTOM_WALL - CAR_SIZE.y {
+            commands.entity(car_entity).despawn();
+        }
+    }
+}
+
+fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
+    let mut text = query.single_mut();
+    text.sections[1].value = scoreboard.score.to_string();
 }
