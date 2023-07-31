@@ -86,7 +86,7 @@ fn setup(
         SpriteSheetBundle {
             texture_atlas: texture_atlas_handle,
             sprite: TextureAtlasSprite::new(animation_indices.first),
-            transform: Transform::from_xyz(0.0, 0.0, 2.0),
+            transform: Transform::from_xyz(0.0, -250., 2.0),
             ..default()
         },
         animation_indices,
