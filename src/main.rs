@@ -7,6 +7,8 @@ mod move_player;
 mod collisions;
 mod sprites;
 
+use std::process::exit;
+use bevy::app::AppExit;
 use bevy::prelude::*;
 
 use components::*;
@@ -41,11 +43,10 @@ const SCORE_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 fn main() {
     App::new()
         .insert_resource(SpawnTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
-        .insert_resource(Scoreboard { score: 0 })
+        .insert_resource(Scoreboard { score: 5 })
         .add_event::<CollisionEvent>()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest())
-            .set(
-                WindowPlugin {
+            .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "RoadStomp".into(),
                         resolution: (900., 600.).into(),
@@ -104,7 +105,7 @@ fn setup(
     commands.spawn(
         TextBundle::from_sections([
             TextSection::new(
-                "Score: ",
+                "Lives: ",
                 TextStyle {
                     font_size: SCOREBOARD_FONT_SIZE,
                     color: TEXT_COLOR,
@@ -126,7 +127,10 @@ fn setup(
     );
 }
 
-fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
+fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>,mut exit: EventWriter<AppExit>) {
     let mut text = query.single_mut();
+    if scoreboard.score == 0 {
+        exit.send(AppExit);
+    }
     text.sections[1].value = scoreboard.score.to_string();
 }
