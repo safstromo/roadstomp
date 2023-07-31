@@ -7,7 +7,6 @@ mod move_player;
 mod collisions;
 mod sprites;
 
-use std::process::exit;
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
