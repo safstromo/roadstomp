@@ -1,7 +1,22 @@
-use bevy::{prelude::*,
-           sprite::collide_aabb::collide,
-};
-use rand::Rng;
+mod components;
+mod spawn_car;
+mod resources;
+mod events;
+mod apply_velocity;
+mod move_player;
+mod collisions;
+mod sprites;
+
+use bevy::prelude::*;
+
+use components::*;
+use resources::*;
+use events::*;
+use spawn_car::spawn_car;
+use apply_velocity::apply_velocity;
+use move_player::move_player;
+use collisions::check_for_collisions;
+use sprites::animate_sprite;
 
 const PLAYER_SPEED: f32 = 500.0;
 const PLAYER_PADDING: f32 = 10.0;
@@ -51,38 +66,6 @@ fn main() {
         .add_systems(Update, (update_scoreboard, animate_sprite, bevy::window::close_on_esc))
         .run();
 }
-
-#[derive(Component)]
-struct Player;
-
-#[derive(Component, Debug)]
-struct Car;
-
-#[derive(Resource)]
-struct SpawnTimer(Timer);
-
-#[derive(Component, Deref, DerefMut)]
-struct Velocity(Vec2);
-
-#[derive(Resource)]
-struct Scoreboard {
-    score: usize,
-}
-
-#[derive(Component)]
-struct Collider;
-
-#[derive(Event, Default)]
-struct CollisionEvent;
-
-#[derive(Component)]
-struct AnimationIndices {
-    first: usize,
-    last: usize,
-}
-
-#[derive(Component, Deref, DerefMut)]
-struct AnimationTimer(Timer);
 
 fn setup(
     mut commands: Commands,
@@ -143,161 +126,7 @@ fn setup(
     );
 }
 
-fn spawn_car(
-    mut commands: Commands,
-    time: Res<Time>,
-    mut timer: ResMut<SpawnTimer>,
-    asset_server: Res<AssetServer>,
-) {
-    let mut rng = rand::thread_rng();
-    if timer.0.tick(time.delta()).just_finished() {
-        commands.spawn(
-            (SpriteBundle {
-                texture: asset_server.load("car.png"),
-                // custom_size: Some(CAR_SIZE),
-                transform: Transform {
-                    translation: Vec3::new(rng.gen_range(LEFT_WALL..RIGHT_WALL), TOP_WALL, 1.),
-                    scale: Vec3::splat(4.0),
-                    ..default()
-                },
-                ..default()
-            },
-             Car,
-             Velocity(INITIAL_CAR_DIRECTION.normalize() * CAR_SPEED),
-             Collider
-            ));
-    }
-}
-
-fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time_step: Res<FixedTime>) {
-    for (mut transform, velocity) in &mut query {
-        transform.translation.x += velocity.x * time_step.period.as_secs_f32();
-        transform.translation.y += velocity.y * time_step.period.as_secs_f32();
-    }
-}
-
-fn move_player(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<&mut Transform, With<Player>>,
-    time_step: Res<FixedTime>,
-) {
-    let mut player_transform = query.single_mut();
-    let mut horizontal = 0.0;
-    let mut vertical = 0.0;
-
-    if keyboard_input.pressed(KeyCode::Left) {
-        horizontal -= 1.0;
-    }
-
-    if keyboard_input.pressed(KeyCode::Right) {
-        horizontal += 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::Up) {
-        vertical += 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::Down) {
-        vertical -= 1.0;
-
-    }
-
-    // Calculate the new horizontal player position based on player input
-    let new_player_position_horizontal =
-        player_transform.translation.x + horizontal * PLAYER_SPEED * time_step.period.as_secs_f32();
-
-    let new_player_position_vertical =
-        player_transform.translation.y + vertical * PLAYER_SPEED * time_step.period.as_secs_f32();
-    // Update the player position,
-    // making sure it doesn't cause the player to leave the arena
-    let left_bound = LEFT_WALL + WALL_THICKNESS / 2.0 + PLAYER_SIZE.x / 2.0 + PLAYER_PADDING;
-    let right_bound = RIGHT_WALL - WALL_THICKNESS / 2.0 - PLAYER_SIZE.x / 2.0 - PLAYER_PADDING;
-    let top_bound = TOP_WALL - WALL_THICKNESS / 2.0 - PLAYER_SIZE.y / 2.0 - PLAYER_PADDING;
-    let bottom_bound = BOTTOM_WALL + WALL_THICKNESS / 2.0 + PLAYER_SIZE.y / 2.0 + PLAYER_PADDING;
-
-    player_transform.translation.x = new_player_position_horizontal.clamp(left_bound, right_bound);
-    player_transform.translation.y = new_player_position_vertical.clamp(bottom_bound, top_bound);
-}
-
-fn check_for_collisions(
-    mut commands: Commands,
-    mut scoreboard: ResMut<Scoreboard>,
-    mut player_query: Query<(Entity, &Transform), With<Player>>,
-    collider_query: Query<(Entity, &Transform), With<Car>>,
-    mut collision_events: EventWriter<CollisionEvent>,
-    mut player_sprite_query: Query<(&Transform, &Handle<Image>), With<Player>>,
-    mut car_sprite_query: Query<(&Transform, &Handle<Image>), With<Car>>,
-    assets: Res<Assets<Image>>,
-) {
-    let (_player_entity, player_transform) = player_query.single_mut();
-
-    let player_size = get_player_size(&mut player_sprite_query, &assets);
-    let car_size = get_car_size(&mut car_sprite_query, assets);
-
-    for (car_entity, car_transform) in collider_query.iter() {
-        if collide(player_transform.translation,
-                   player_size,
-                   car_transform.translation,
-                   car_size).is_some() {
-            scoreboard.score += 1;
-            collision_events.send_default();
-            commands.entity(car_entity).despawn();
-        }
-
-        if car_transform.translation.y <= BOTTOM_WALL - CAR_SIZE.y {
-            commands.entity(car_entity).despawn();
-        }
-    }
-}
-
-fn get_player_size(sprite_query: &mut Query<(&Transform, &Handle<Image>), With<Player>>, assets: &Res<Assets<Image>>) -> Vec2 {
-    let mut player_size = Vec2::new(0.0, 0.0);
-    for (transform, image_handle) in sprite_query.iter_mut() {
-        let image_dimensions = assets.get(image_handle).unwrap().size();
-
-        let scaled_image_dimension = image_dimensions * transform.scale.truncate();
-
-        let bounding_box = Rect::from_center_size(transform.translation.truncate(), scaled_image_dimension);
-        player_size = bounding_box.size();
-    }
-    player_size
-}
-
-fn get_car_size(sprite_query: &mut Query<(&Transform, &Handle<Image>), With<Car>>, assets: Res<Assets<Image>>) -> Vec2 {
-
-    let mut car_size = Vec2::new(0.0, 0.0);
-    for (transform, image_handle) in sprite_query.iter_mut() {
-        if assets.get(image_handle).is_some() {
-            let image_dimensions = assets.get(image_handle).unwrap().size();
-
-            let scaled_image_dimension = image_dimensions * transform.scale.truncate();
-
-            let bounding_box = Rect::from_center_size(transform.translation.truncate(), scaled_image_dimension);
-            car_size = bounding_box.size();
-        }
-    }
-    car_size
-}
-
 fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
     let mut text = query.single_mut();
     text.sections[1].value = scoreboard.score.to_string();
-}
-
-fn animate_sprite(
-    time: Res<Time>,
-    mut query: Query<(
-        &AnimationIndices,
-        &mut AnimationTimer,
-        &mut TextureAtlasSprite,
-    )>,
-) {
-    for (indices, mut timer, mut sprite) in &mut query {
-        timer.tick(time.delta());
-        if timer.just_finished() {
-            sprite.index = if sprite.index == indices.last {
-                indices.first
-            } else {
-                sprite.index + 1
-            };
-        }
-    }
 }
