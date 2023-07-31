@@ -28,7 +28,7 @@ fn main() {
         .insert_resource(SpawnTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
         .insert_resource(Scoreboard { score: 0 })
         .add_event::<CollisionEvent>()
-        .add_plugins((DefaultPlugins, ))
+        .add_plugins((DefaultPlugins.set(ImagePlugin::default_nearest()), ))
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (
             spawn_car,
@@ -38,7 +38,7 @@ fn main() {
                 .before(check_for_collisions)
                 .after(apply_velocity),
         ))
-        .add_systems(Update, (update_scoreboard, bevy::window::close_on_esc))
+        .add_systems(Update, (update_scoreboard, animate_sprite, bevy::window::close_on_esc))
         .run();
 }
 
@@ -65,25 +65,41 @@ struct Collider;
 #[derive(Event, Default)]
 struct CollisionEvent;
 
+#[derive(Component)]
+struct AnimationIndices {
+    first: usize,
+    last: usize,
+}
+
+#[derive(Component, Deref, DerefMut)]
+struct AnimationTimer(Timer);
 
 fn setup(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
+    let texture_handle = asset_server.load("chicken_sheet.png");
+    let texture_atlas =
+        TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 2, 1, None, None);
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    // Use only the subset of sprites in the sheet that make up the run animation
+    let animation_indices = AnimationIndices { first: 0, last: 1 };
+
     commands.spawn(Camera2dBundle::default());
 
-    // Rectangle
-    commands.spawn((SpriteBundle {
-        sprite: Sprite {
-            color: Color::BLACK,
-            custom_size: Some(PLAYER_SIZE),
+    commands.spawn((
+        SpriteSheetBundle {
+            texture_atlas: texture_atlas_handle,
+            sprite: TextureAtlasSprite::new(animation_indices.first),
             ..default()
         },
-        transform: Transform::from_translation(Vec3::new(-50., BOTTOM_WALL + 20.0, 0.)),
-        ..default()
-    },
-                    Player,
-                    Collider,
+        animation_indices,
+        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        Player,
+        Collider,
     ));
+
     commands.spawn(
         TextBundle::from_sections([
             TextSection::new(
@@ -113,19 +129,22 @@ fn spawn_car(
     mut commands: Commands,
     time: Res<Time>,
     mut timer: ResMut<SpawnTimer>,
+    asset_server: Res<AssetServer>,
 ) {
     let mut rng = rand::thread_rng();
     if timer.0.tick(time.delta()).just_finished() {
         commands.spawn(
             (SpriteBundle {
-                sprite: Sprite {
-                    color: Color::BLACK,
-                    custom_size: Some(CAR_SIZE),
+                texture: asset_server.load("car.png"),
+                // custom_size: Some(CAR_SIZE),
+                transform: Transform {
+                    translation: Vec3::new(rng.gen_range(LEFT_WALL..RIGHT_WALL), TOP_WALL, 1.),
+                    scale: Vec3::splat(4.0),
                     ..default()
                 },
-                transform: Transform::from_translation(Vec3::new(rng.gen_range(LEFT_WALL..RIGHT_WALL), TOP_WALL, 1.)),
                 ..default()
-            }, Car,
+            },
+             Car,
              Velocity(INITIAL_CAR_DIRECTION.normalize() * CAR_SPEED),
              Collider
             ));
@@ -196,4 +215,24 @@ fn check_for_collisions(
 fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
     let mut text = query.single_mut();
     text.sections[1].value = scoreboard.score.to_string();
+}
+
+fn animate_sprite(
+    time: Res<Time>,
+    mut query: Query<(
+        &AnimationIndices,
+        &mut AnimationTimer,
+        &mut TextureAtlasSprite,
+    )>,
+) {
+    for (indices, mut timer, mut sprite) in &mut query {
+        timer.tick(time.delta());
+        if timer.just_finished() {
+            sprite.index = if sprite.index == indices.last {
+                indices.first
+            } else {
+                sprite.index + 1
+            };
+        }
+    }
 }
