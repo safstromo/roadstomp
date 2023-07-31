@@ -28,7 +28,17 @@ fn main() {
         .insert_resource(SpawnTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
         .insert_resource(Scoreboard { score: 0 })
         .add_event::<CollisionEvent>()
-        .add_plugins((DefaultPlugins.set(ImagePlugin::default_nearest()), ))
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest())
+            .set(
+                WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "RoadStomp".into(),
+                        resolution: (900., 600.).into(),
+                        ..default()
+                    }),
+                    ..default()
+                }
+            ))
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (
             spawn_car,
@@ -80,6 +90,7 @@ fn setup(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     let texture_handle = asset_server.load("chicken_sheet.png");
+    let background_image = asset_server.load("road.png");
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 2, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
@@ -92,6 +103,7 @@ fn setup(
         SpriteSheetBundle {
             texture_atlas: texture_atlas_handle,
             sprite: TextureAtlasSprite::new(animation_indices.first),
+            transform: Transform::from_xyz(0.0, 0.0, 2.0),
             ..default()
         },
         animation_indices,
@@ -99,7 +111,13 @@ fn setup(
         Player,
         Collider,
     ));
-
+    commands.spawn(
+        SpriteBundle {
+            texture: background_image,
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            ..default()
+        }
+    );
     commands.spawn(
         TextBundle::from_sections([
             TextSection::new(
