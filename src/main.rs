@@ -4,17 +4,20 @@ mod events;
 mod player;
 mod resources;
 mod sprites;
+mod ui;
 
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
 use events::*;
 use resources::*;
+use crate::AppState::Menu;
 
 use crate::car::CarPlugin;
 use crate::collisions::CollisionPlugin;
 use crate::player::PlayerPlugin;
 use crate::sprites::SpritePlugin;
+use crate::ui::UiPlugin;
 
 const WALL_THICKNESS: f32 = 10.0;
 
@@ -32,8 +35,8 @@ const SCORE_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
 enum AppState {
-    Menu,
     #[default]
+    Menu,
     InGame,
     GameOver,
 }
@@ -63,6 +66,7 @@ fn main() {
                     ..default()
                 }),
         )
+        .add_plugins(UiPlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(SpritePlugin)
         .add_plugins(CarPlugin)
@@ -81,15 +85,15 @@ fn main() {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let background_image = asset_server.load("road.png");
+    // let background_image = asset_server.load("road.png");
 
     commands.spawn(Camera2dBundle::default());
 
-    commands.spawn(SpriteBundle {
-        texture: background_image,
-        transform: Transform::from_xyz(0.0, 0.0, 0.0),
-        ..default()
-    });
+    // commands.spawn(SpriteBundle {
+    //     texture: background_image,
+    //     transform: Transform::from_xyz(0.0, 0.0, 0.0),
+    //     ..default()
+    // });
     commands.spawn(
         TextBundle::from_sections([
             TextSection::new(
