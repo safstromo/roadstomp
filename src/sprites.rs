@@ -1,7 +1,16 @@
 use bevy::prelude::*;
-use crate::components::{AnimationIndices, AnimationTimer};
 
-pub fn animate_sprite(
+pub struct SpritePlugin;
+
+impl Plugin for SpritePlugin{
+    fn build(&self, app: &mut App) {
+       app.add_systems(Update, animate_sprite) ;
+    }
+}
+
+
+
+fn animate_sprite(
     time: Res<Time>,
     mut query: Query<(
         &AnimationIndices,
@@ -20,3 +29,13 @@ pub fn animate_sprite(
         }
     }
 }
+
+#[derive(Component)]
+pub struct AnimationIndices {
+    pub(crate) first: usize,
+    pub(crate) last: usize,
+}
+#[derive(Component, Deref, DerefMut)]
+pub struct AnimationTimer(pub Timer);
+
+

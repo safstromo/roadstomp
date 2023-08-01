@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb::collide;
 use crate::{BOTTOM_WALL, CAR_SIZE};
-use crate::components::{Car, Player};
+use crate::components::{Car};
 use crate::events::CollisionEvent;
+use crate::move_player::Player;
 use crate::resources::Scoreboard;
 
 
@@ -26,7 +27,7 @@ pub fn check_for_collisions(
                    player_size,
                    car_transform.translation,
                    car_size).is_some() {
-            scoreboard.score -= 1;
+            scoreboard.score += 1;
             collision_events.send_default();
             commands.entity(car_entity).despawn();
         }

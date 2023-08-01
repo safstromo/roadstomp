@@ -10,14 +10,13 @@ mod sprites;
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
-use components::*;
 use resources::*;
 use events::*;
 use spawn_car::spawn_car;
 use apply_velocity::apply_velocity;
-use move_player::move_player;
 use collisions::check_for_collisions;
-use sprites::animate_sprite;
+use crate::move_player::{Player, PlayerPlugin};
+use crate::sprites::SpritePlugin;
 
 const PLAYER_SPEED: f32 = 500.0;
 const PLAYER_PADDING: f32 = 10.0;
@@ -39,32 +38,54 @@ const SCOREBOARD_TEXT_PADDING: Val = Val::Px(5.0);
 const TEXT_COLOR: Color = Color::rgb(0.5, 0.5, 1.0);
 const SCORE_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
+enum AppState {
+    #[default]
+    Menu,
+    InGame,
+    GameOver,
+}
+
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
+enum GameState {
+    Paused,
+    #[default]
+    Running,
+}
+
 fn main() {
     App::new()
+        .add_state::<GameState>()
         .insert_resource(SpawnTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
         .insert_resource(Scoreboard { score: 5 })
         .add_event::<CollisionEvent>()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: "RoadStomp".into(),
-                        resolution: (900., 600.).into(),
-                        ..default()
-                    }),
+                primary_window: Some(Window {
+                    title: "RoadStomp".into(),
+                    resolution: (900., 600.).into(),
                     ..default()
-                }
+                }),
+                ..default()
+            }
             ))
+        .add_plugins(PlayerPlugin)
+        .add_plugins(SpritePlugin)
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (
             spawn_car,
             check_for_collisions,
             apply_velocity.before(check_for_collisions),
-            move_player
-                .before(check_for_collisions)
-                .after(apply_velocity),
+            // move_player
+            //     .before(check_for_collisions)
+            //     .after(apply_velocity),
         ))
-        .add_systems(Update, (update_scoreboard, animate_sprite, bevy::window::close_on_esc))
+        .add_systems(Update, (update_scoreboard,toggle_gamestate , bevy::window::close_on_esc))
         .run();
+}
+
+fn print_test() {
+    println!("TEST");
 }
 
 fn setup(
@@ -72,28 +93,11 @@ fn setup(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    let texture_handle = asset_server.load("chicken_sheet.png");
     let background_image = asset_server.load("road.png");
-    let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 2, 1, None, None);
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    // Use only the subset of sprites in the sheet that make up the run animation
-    let animation_indices = AnimationIndices { first: 0, last: 1 };
 
     commands.spawn(Camera2dBundle::default());
 
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: texture_atlas_handle,
-            sprite: TextureAtlasSprite::new(animation_indices.first),
-            transform: Transform::from_xyz(0.0, -250., 2.0),
-            ..default()
-        },
-        animation_indices,
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-        Player,
-        Collider,
-    ));
+
     commands.spawn(
         SpriteBundle {
             texture: background_image,
@@ -126,10 +130,26 @@ fn setup(
     );
 }
 
-fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>,mut exit: EventWriter<AppExit>) {
+fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>, mut exit: EventWriter<AppExit>) {
     let mut text = query.single_mut();
     if scoreboard.score == 0 {
         exit.send(AppExit);
     }
     text.sections[1].value = scoreboard.score.to_string();
+}
+
+fn toggle_gamestate(
+    mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    game_state: Res<State<GameState>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Space) && game_state.as_ref() == &GameState::Running {
+
+        println!("Setting gamestate to: Paused");
+        commands.insert_resource(NextState(Some(GameState::Paused)));
+    }
+    if keyboard_input.just_pressed(KeyCode::Space) && game_state.as_ref() == &GameState::Paused {
+        println!("Setting gamestate to: Running");
+        commands.insert_resource(NextState(Some(GameState::Running)));
+    }
 }
