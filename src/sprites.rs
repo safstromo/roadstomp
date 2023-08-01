@@ -1,14 +1,18 @@
+use crate::{AppState, GameState};
 use bevy::prelude::*;
 
 pub struct SpritePlugin;
 
-impl Plugin for SpritePlugin{
+impl Plugin for SpritePlugin {
     fn build(&self, app: &mut App) {
-       app.add_systems(Update, animate_sprite) ;
+        app.add_systems(
+            Update,
+            animate_sprite
+                .run_if(in_state(AppState::InGame))
+                .run_if(in_state(GameState::Running)),
+        );
     }
 }
-
-
 
 fn animate_sprite(
     time: Res<Time>,
@@ -37,5 +41,3 @@ pub struct AnimationIndices {
 }
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(pub Timer);
-
-

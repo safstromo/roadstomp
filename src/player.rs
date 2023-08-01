@@ -1,7 +1,8 @@
-use bevy::prelude::*;
-use crate::{ BOTTOM_WALL,  LEFT_WALL,  RIGHT_WALL, TOP_WALL, WALL_THICKNESS};
 use crate::collisions::Collider;
 use crate::sprites::{AnimationIndices, AnimationTimer};
+use crate::{AppState, GameState, BOTTOM_WALL, LEFT_WALL, RIGHT_WALL, TOP_WALL, WALL_THICKNESS};
+use bevy::prelude::*;
+
 const PLAYER_SPEED: f32 = 500.0;
 const PLAYER_PADDING: f32 = 10.0;
 const PLAYER_SIZE: Vec2 = Vec2::new(5.0, 8.0);
@@ -10,19 +11,17 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_systems(Startup, spawn_player)
-            .add_systems(FixedUpdate,
-                         move_player,
-            )
-
-        ;
+        app.add_systems(Startup, spawn_player).add_systems(
+            FixedUpdate,
+            move_player
+                .run_if(in_state(AppState::InGame))
+                .run_if(in_state(GameState::Running)),
+        );
     }
 }
 
 #[derive(Component)]
 pub struct Player;
-
 
 fn spawn_player(
     mut commands: Commands,
