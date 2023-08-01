@@ -34,7 +34,7 @@ const TEXT_COLOR: Color = Color::rgb(0.5, 0.5, 1.0);
 const SCORE_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
-enum AppState {
+pub enum AppState {
     #[default]
     Menu,
     InGame,
@@ -42,7 +42,7 @@ enum AppState {
 }
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq, Hash, States)]
-enum GameState {
+pub enum GameState {
     #[default]
     Paused,
     Running,

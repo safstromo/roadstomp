@@ -1,4 +1,5 @@
 use bevy::a11y::accesskit::{Invalid, Size};
+use bevy::app::AppExit;
 use bevy::prelude::*;
 use crate::{AppState, GameState};
 
@@ -12,7 +13,12 @@ impl Plugin for UiPlugin {
             .add_systems(OnEnter(AppState::InGame), spawn_game_background)
             .add_systems(OnExit(AppState::InGame), despawn_Gamebackground)
             .add_systems(Update, toggle_appstate)
-        ;
+            .add_systems(Update,
+                         (
+                             interact_with_play_button,
+                             interact_with_quit_button
+                         ).run_if(in_state(AppState::Menu))
+            );
     }
 }
 
@@ -69,7 +75,7 @@ fn build_menu(
                         style: Style {
                             width: Val::Px(32.0),
                             height: Val::Px(32.0),
-                            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0),Val::Px(8.0)),
+                            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0), Val::Px(8.0)),
                             ..default()
                         },
                         image: asset_server.load("chicken1.png").into(),
@@ -100,92 +106,91 @@ fn build_menu(
                         style: Style {
                             width: Val::Px(32.0),
                             height: Val::Px(32.0),
-                            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0),Val::Px(8.0)),
+                            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0), Val::Px(8.0)),
                             ..default()
                         },
                         image: asset_server.load("chicken1.png").into(),
                         ..default()
                     });
             }
-
-        );
-    //playbutton
-    parent.spawn(
-        (
-            ButtonBundle {
-                style: Style {
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    width: Val::Px(200.0),
-                    height: Val::Px(80.0),
-                    ..default()
-                },
-                background_color: Color::BLACK.into(),
-                ..default()
-            },
-            PlayButton,
-        )
-    ).with_children(|parent| {
-        parent.spawn(
-            TextBundle {
-                text: Text {
-                    sections: vec![
-                        TextSection::new(
-                            "Play",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 32.0,
-                                color: Color::WHITE,
-                            },
-                        )
-                    ],
-                    alignment: TextAlignment::Center,
-                    ..default()
-                },
-                ..default()
-            }
-        );
-    });
-    //quitbutton
-    parent.spawn(
-        (
-            ButtonBundle {
-                style: Style {
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    width: Val::Px(200.0),
-                    height: Val::Px(80.0),
-                    ..default()
-                },
-                background_color: Color::BLACK.into(),
-                ..default()
-            },
-            QuitButton
-        )
-    )
-        .with_children(|parent| {
+            );
+            //playbutton
             parent.spawn(
-                TextBundle {
-                    text: Text {
-                        sections: vec![
-                            TextSection::new(
-                                "Quit",
-                                TextStyle {
-                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                    font_size: 32.0,
-                                    color: Color::WHITE,
-                                },
-                            )
-                        ],
-                        alignment: TextAlignment::Center,
+                (
+                    ButtonBundle {
+                        style: Style {
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            width: Val::Px(200.0),
+                            height: Val::Px(80.0),
+                            ..default()
+                        },
+                        background_color: Color::BLACK.into(),
                         ..default()
                     },
-                    ..default()
-                }
-            );
-        });
-})
-    .id();
+                    PlayButton,
+                )
+            ).with_children(|parent| {
+                parent.spawn(
+                    TextBundle {
+                        text: Text {
+                            sections: vec![
+                                TextSection::new(
+                                    "Play",
+                                    TextStyle {
+                                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                        font_size: 32.0,
+                                        color: Color::WHITE,
+                                    },
+                                )
+                            ],
+                            alignment: TextAlignment::Center,
+                            ..default()
+                        },
+                        ..default()
+                    }
+                );
+            });
+            //quitbutton
+            parent.spawn(
+                (
+                    ButtonBundle {
+                        style: Style {
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            width: Val::Px(200.0),
+                            height: Val::Px(80.0),
+                            ..default()
+                        },
+                        background_color: Color::BLACK.into(),
+                        ..default()
+                    },
+                    QuitButton
+                )
+            )
+                .with_children(|parent| {
+                    parent.spawn(
+                        TextBundle {
+                            text: Text {
+                                sections: vec![
+                                    TextSection::new(
+                                        "Quit",
+                                        TextStyle {
+                                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                            font_size: 32.0,
+                                            color: Color::WHITE,
+                                        },
+                                    )
+                                ],
+                                alignment: TextAlignment::Center,
+                                ..default()
+                            },
+                            ..default()
+                        }
+                    );
+                });
+        })
+        .id();
     menu_entity
 }
 
@@ -233,8 +238,57 @@ struct Menu;
 struct GameBackground;
 
 #[derive(Component)]
-struct PlayButton;
+pub struct PlayButton;
 
 #[derive(Component)]
-struct QuitButton;
+pub struct QuitButton;
 
+pub fn interact_with_play_button(
+    mut button_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<PlayButton>),
+    >,
+    mut app_state_next_state: ResMut<NextState<AppState>>,
+) {
+    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+        match *interaction {
+            Interaction::Pressed => {
+                *background_color = PRESSED_BUTTON_COLOR.into();
+                app_state_next_state.set(AppState::InGame);
+            }
+            Interaction::Hovered => {
+                *background_color = HOVERED_BUTTON_COLOR.into();
+            }
+            Interaction::None => {
+                *background_color = NORMAL_BUTTON_COLOR.into();
+            }
+        }
+    }
+}
+
+pub const NORMAL_BUTTON_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
+pub const HOVERED_BUTTON_COLOR: Color = Color::rgb(0.25, 0.25, 0.25);
+pub const PRESSED_BUTTON_COLOR: Color = Color::rgb(0.35, 0.75, 0.35);
+
+pub fn interact_with_quit_button(
+    mut app_exit_event_writer: EventWriter<AppExit>,
+    mut button_query: Query<
+        (&Interaction, &mut BackgroundColor),
+        (Changed<Interaction>, With<QuitButton>),
+    >,
+) {
+    if let Ok((interaction, mut background_color)) = button_query.get_single_mut() {
+        match *interaction {
+            Interaction::Pressed => {
+                *background_color = PRESSED_BUTTON_COLOR.into();
+                app_exit_event_writer.send(AppExit);
+            }
+            Interaction::Hovered => {
+                *background_color = HOVERED_BUTTON_COLOR.into();
+            }
+            Interaction::None => {
+                *background_color = NORMAL_BUTTON_COLOR.into();
+            }
+        }
+    }
+}
