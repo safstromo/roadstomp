@@ -45,40 +45,46 @@ fn build_menu(
                 height: Val::Percent(100.0),
                 ..default()
             },
-            background_color: Color::RED.into(),
             ..default()
         },
                 Menu,
         ))
         .with_children(|parent| {
             //title
-
-            //playbutton
             parent.spawn(
-                (
-                    ButtonBundle {
-                        style: Style {
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            width: Val::Px(200.0),
-                            height: Val::Px(80.0),
-                            ..default()
-                        },
-                        background_color: Color::BLACK.into(),
+                NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::Row,
+                        justify_content: JustifyContent::Center,
+                        align_items: AlignItems::Center,
+                        width: Val::Px(300.0),
+                        height: Val::Px(120.0),
                         ..default()
                     },
-                    PlayButton,
-                )
-            ).with_children(|parent| {
+                    ..default()
+                }).with_children(|parent| {
+                //image
+                parent.spawn(
+                    ImageBundle {
+                        style: Style {
+                            width: Val::Px(32.0),
+                            height: Val::Px(32.0),
+                            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0),Val::Px(8.0)),
+                            ..default()
+                        },
+                        image: asset_server.load("chicken1.png").into(),
+                        ..default()
+                    });
+                //Text
                 parent.spawn(
                     TextBundle {
                         text: Text {
                             sections: vec![
                                 TextSection::new(
-                                    "Play",
+                                    "RoadStomp",
                                     TextStyle {
                                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                        font_size: 32.0,
+                                        font_size: 64.0,
                                         color: Color::WHITE,
                                     },
                                 )
@@ -87,49 +93,99 @@ fn build_menu(
                             ..default()
                         },
                         ..default()
-                    }
-                );
-            });
-            //quitbutton
-            parent.spawn(
-                (
-                    ButtonBundle {
+                    });
+                //image
+                parent.spawn(
+                    ImageBundle {
                         style: Style {
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            width: Val::Px(200.0),
-                            height: Val::Px(80.0),
+                            width: Val::Px(32.0),
+                            height: Val::Px(32.0),
+                            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0),Val::Px(8.0)),
                             ..default()
                         },
-                        background_color: Color::BLACK.into(),
+                        image: asset_server.load("chicken1.png").into(),
+                        ..default()
+                    });
+            }
+
+        );
+    //playbutton
+    parent.spawn(
+        (
+            ButtonBundle {
+                style: Style {
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    width: Val::Px(200.0),
+                    height: Val::Px(80.0),
+                    ..default()
+                },
+                background_color: Color::BLACK.into(),
+                ..default()
+            },
+            PlayButton,
+        )
+    ).with_children(|parent| {
+        parent.spawn(
+            TextBundle {
+                text: Text {
+                    sections: vec![
+                        TextSection::new(
+                            "Play",
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 32.0,
+                                color: Color::WHITE,
+                            },
+                        )
+                    ],
+                    alignment: TextAlignment::Center,
+                    ..default()
+                },
+                ..default()
+            }
+        );
+    });
+    //quitbutton
+    parent.spawn(
+        (
+            ButtonBundle {
+                style: Style {
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    width: Val::Px(200.0),
+                    height: Val::Px(80.0),
+                    ..default()
+                },
+                background_color: Color::BLACK.into(),
+                ..default()
+            },
+            QuitButton
+        )
+    )
+        .with_children(|parent| {
+            parent.spawn(
+                TextBundle {
+                    text: Text {
+                        sections: vec![
+                            TextSection::new(
+                                "Quit",
+                                TextStyle {
+                                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                    font_size: 32.0,
+                                    color: Color::WHITE,
+                                },
+                            )
+                        ],
+                        alignment: TextAlignment::Center,
                         ..default()
                     },
-                    QuitButton
-                )
-            )
-                .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle {
-                            text: Text {
-                                sections: vec![
-                                    TextSection::new(
-                                        "Quit",
-                                        TextStyle {
-                                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                            font_size: 32.0,
-                                            color: Color::WHITE,
-                                        },
-                                    )
-                                ],
-                                alignment: TextAlignment::Center,
-                                ..default()
-                            },
-                            ..default()
-                        }
-                    );
-                });
-        })
-        .id();
+                    ..default()
+                }
+            );
+        });
+})
+    .id();
     menu_entity
 }
 
