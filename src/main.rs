@@ -1,9 +1,8 @@
 mod components;
-mod spawn_car;
+mod car;
 mod resources;
 mod events;
-mod apply_velocity;
-mod move_player;
+mod player;
 mod collisions;
 mod sprites;
 
@@ -12,18 +11,12 @@ use bevy::prelude::*;
 
 use resources::*;
 use events::*;
-use spawn_car::spawn_car;
-use apply_velocity::apply_velocity;
+
 use collisions::check_for_collisions;
-use crate::move_player::{Player, PlayerPlugin};
+use crate::player::{ PlayerPlugin};
+use crate::car::CarPlugin;
 use crate::sprites::SpritePlugin;
 
-const PLAYER_SPEED: f32 = 500.0;
-const PLAYER_PADDING: f32 = 10.0;
-const PLAYER_SIZE: Vec2 = Vec2::new(5.0, 8.0);
-const CAR_SIZE: Vec2 = Vec2::new(20.0, 50.0);
-const INITIAL_CAR_DIRECTION: Vec2 = Vec2::new(0.0, -0.5);
-const CAR_SPEED: f32 = 400.0;
 const WALL_THICKNESS: f32 = 10.0;
 
 // x coordinates
@@ -71,11 +64,11 @@ fn main() {
             ))
         .add_plugins(PlayerPlugin)
         .add_plugins(SpritePlugin)
+        .add_plugins(CarPlugin)
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (
-            spawn_car,
             check_for_collisions,
-            apply_velocity.before(check_for_collisions),
+            // apply_velocity.before(check_for_collisions),
             // move_player
             //     .before(check_for_collisions)
             //     .after(apply_velocity),
@@ -91,7 +84,6 @@ fn print_test() {
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     let background_image = asset_server.load("road.png");
 

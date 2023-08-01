@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb::collide;
-use crate::{BOTTOM_WALL, CAR_SIZE};
+use crate::{BOTTOM_WALL, };
 use crate::components::{Car};
 use crate::events::CollisionEvent;
-use crate::move_player::Player;
+use crate::player::Player;
 use crate::resources::Scoreboard;
+use crate::car::CAR_SIZE;
 
 
 pub fn check_for_collisions(

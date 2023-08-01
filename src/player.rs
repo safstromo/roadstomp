@@ -1,8 +1,10 @@
 use bevy::prelude::*;
-use crate::{AppState, BOTTOM_WALL, GameState, LEFT_WALL, PLAYER_PADDING, PLAYER_SIZE, PLAYER_SPEED, RIGHT_WALL, TOP_WALL, WALL_THICKNESS};
+use crate::{ BOTTOM_WALL,  LEFT_WALL,  RIGHT_WALL, TOP_WALL, WALL_THICKNESS};
 use crate::components::{ Collider};
 use crate::sprites::{AnimationIndices, AnimationTimer};
-
+const PLAYER_SPEED: f32 = 500.0;
+const PLAYER_PADDING: f32 = 10.0;
+const PLAYER_SIZE: Vec2 = Vec2::new(5.0, 8.0);
 
 pub struct PlayerPlugin;
 
