@@ -1,14 +1,22 @@
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb::collide;
 use crate::{BOTTOM_WALL, };
-use crate::components::{Car};
 use crate::events::CollisionEvent;
 use crate::player::Player;
 use crate::resources::Scoreboard;
-use crate::car::CAR_SIZE;
+use crate::car::{Car, CAR_SIZE};
 
 
-pub fn check_for_collisions(
+pub struct CollisionPlugin;
+
+impl Plugin for CollisionPlugin{
+    fn build(&self, app: &mut App) {
+        app.add_systems(FixedUpdate, check_for_collisions);
+    }
+}
+
+
+fn check_for_collisions(
     mut commands: Commands,
     mut scoreboard: ResMut<Scoreboard>,
     mut player_query: Query<(Entity, &Transform), With<Player>>,
@@ -66,3 +74,5 @@ fn get_car_size(sprite_query: &mut Query<(&Transform, &Handle<Image>), With<Car>
     }
     car_size
 }
+#[derive(Component)]
+pub struct Collider;

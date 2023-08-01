@@ -1,4 +1,3 @@
-mod components;
 mod car;
 mod resources;
 mod events;
@@ -12,9 +11,9 @@ use bevy::prelude::*;
 use resources::*;
 use events::*;
 
-use collisions::check_for_collisions;
 use crate::player::{ PlayerPlugin};
 use crate::car::CarPlugin;
+use crate::collisions::CollisionPlugin;
 use crate::sprites::SpritePlugin;
 
 const WALL_THICKNESS: f32 = 10.0;
@@ -65,20 +64,17 @@ fn main() {
         .add_plugins(PlayerPlugin)
         .add_plugins(SpritePlugin)
         .add_plugins(CarPlugin)
+        .add_plugins(CollisionPlugin)
         .add_systems(Startup, setup)
-        .add_systems(FixedUpdate, (
-            check_for_collisions,
+        // .add_systems(FixedUpdate, (
+            // check_for_collisions,
             // apply_velocity.before(check_for_collisions),
             // move_player
             //     .before(check_for_collisions)
             //     .after(apply_velocity),
-        ))
+        // ))
         .add_systems(Update, (update_scoreboard,toggle_gamestate , bevy::window::close_on_esc))
         .run();
-}
-
-fn print_test() {
-    println!("TEST");
 }
 
 fn setup(

@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use rand::Rng;
 use crate::{ LEFT_WALL, RIGHT_WALL, SpawnTimer, TOP_WALL};
-use crate::components::{Car, Collider, Velocity};
+use crate::collisions::Collider;
+
 const INITIAL_CAR_DIRECTION: Vec2 = Vec2::new(0.0, -0.5);
 const CAR_SPEED: f32 = 400.0;
 pub const CAR_SIZE: Vec2 = Vec2::new(20.0, 50.0);
@@ -46,3 +47,8 @@ fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time_step: Res<
         transform.translation.y += velocity.y * time_step.period.as_secs_f32();
     }
 }
+#[derive(Component, Deref, DerefMut)]
+pub struct Velocity(pub Vec2);
+
+#[derive(Component, Debug)]
+pub struct Car;

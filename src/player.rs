@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use crate::{ BOTTOM_WALL,  LEFT_WALL,  RIGHT_WALL, TOP_WALL, WALL_THICKNESS};
-use crate::components::{ Collider};
+use crate::collisions::Collider;
 use crate::sprites::{AnimationIndices, AnimationTimer};
 const PLAYER_SPEED: f32 = 500.0;
 const PLAYER_PADDING: f32 = 10.0;
