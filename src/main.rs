@@ -79,7 +79,7 @@ fn main() {
         //     .before(check_for_collisions)
         //     .after(apply_velocity),
         // ))
-        .add_systems(Update, (update_scoreboard, bevy::window::close_on_esc))
+        .add_systems(Update, (/*update_scoreboard,*/ bevy::window::close_on_esc))
         .add_systems(Update, toggle_gamestate.run_if(in_state(AppState::InGame)))
         .run();
 }
@@ -94,43 +94,44 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     //     transform: Transform::from_xyz(0.0, 0.0, 0.0),
     //     ..default()
     // });
-    commands.spawn(
-        TextBundle::from_sections([
-            TextSection::new(
-                "Lives: ",
-                TextStyle {
-                    font_size: SCOREBOARD_FONT_SIZE,
-                    color: TEXT_COLOR,
-                    ..default()
-                },
-            ),
-            TextSection::from_style(TextStyle {
-                font_size: SCOREBOARD_FONT_SIZE,
-                color: SCORE_COLOR,
-                ..default()
-            }),
-        ])
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            top: SCOREBOARD_TEXT_PADDING,
-            left: SCOREBOARD_TEXT_PADDING,
-            ..default()
-        }),
-    );
+//     commands.spawn((
+//         TextBundle::from_sections([
+//             TextSection::new(
+//                 "Lives: ",
+//                 TextStyle {
+//                     font_size: SCOREBOARD_FONT_SIZE,
+//                     color: TEXT_COLOR,
+//                     ..default()
+//                 },
+//             ),
+//             TextSection::from_style(TextStyle {
+//                 font_size: SCOREBOARD_FONT_SIZE,
+//                 color: SCORE_COLOR,
+//                 ..default()
+//             }),
+//         ])
+//         .with_style(Style {
+//             position_type: PositionType::Absolute,
+//             top: SCOREBOARD_TEXT_PADDING,
+//             left: SCOREBOARD_TEXT_PADDING,
+//             ..default()
+//         }),
+//         ScoreBoard,
+//     ));
 }
 
-fn update_scoreboard(
-    scoreboard: Res<Scoreboard>,
-    mut query: Query<&mut Text>,
-    mut exit: EventWriter<AppExit>,
-) {
-    let mut text = query.single_mut();
-    if scoreboard.score == 0 {
-        exit.send(AppExit);
-    }
-    text.sections[1].value = scoreboard.score.to_string();
-}
-
+// fn update_scoreboard(
+//     scoreboard: Res<Scoreboard>,
+//     mut query: Query<&mut Text>,
+//     mut exit: EventWriter<AppExit>,
+// ) {
+//     let mut text = query.single_mut();
+//     if scoreboard.score == 0 {
+//         exit.send(AppExit);
+//     }
+//     text.sections[1].value = scoreboard.score.to_string();
+// }
+//
 fn toggle_gamestate(
     mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
@@ -145,3 +146,6 @@ fn toggle_gamestate(
         commands.insert_resource(NextState(Some(GameState::Running)));
     }
 }
+#[derive(Component)]
+struct ScoreBoard;
+
