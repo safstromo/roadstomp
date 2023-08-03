@@ -1,5 +1,6 @@
 use bevy::app::AppExit;
 use bevy::prelude::*;
+use crate::{AppState, GameState};
 use crate::resources::{Lives, Score};
 use crate::ui::styles::get_button_text_style;
 
@@ -119,13 +120,14 @@ fn build_hud(
 
 
 pub fn update_lives(
+    mut commands: Commands,
     life: Res<Lives>,
     mut query: Query<&mut Text, With<LifeBox>>,
-    mut exit: EventWriter<AppExit>,
 ) {
     let mut text = query.single_mut();  //fails multiple entries
     if life.lives == 0 {
-        exit.send(AppExit);
+        commands.insert_resource(NextState(Some(GameState::Paused)));
+        commands.insert_resource(NextState(Some(AppState::GameOver)));
     }
     text.sections[1].value = life.lives.to_string();
 }

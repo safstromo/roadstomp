@@ -2,10 +2,12 @@ mod menu;
 mod styles;
 mod buttons;
 mod hud;
+mod gameover;
 
 use bevy::prelude::*;
 use crate::{AppState};
 use crate::ui::buttons::*;
+use crate::ui::gameover::{despawn_gameover, spawn_gameover};
 use crate::ui::hud::{despawn_hud, spawn_hud, update_lives, update_score};
 use crate::ui::menu::*;
 
@@ -22,6 +24,8 @@ impl Plugin for UiPlugin {
             .add_systems(OnExit(AppState::Menu), despawn_menu)
             .add_systems(OnEnter(AppState::InGame), spawn_hud)
             .add_systems(OnExit(AppState::InGame), despawn_hud)
+            .add_systems(OnEnter(AppState::GameOver), spawn_gameover)
+            .add_systems(OnExit(AppState::GameOver), despawn_gameover)
             .add_systems(Update, (toggle_appstate, ))
             .add_systems(Update, (
                 update_lives,
@@ -30,7 +34,11 @@ impl Plugin for UiPlugin {
             .add_systems(Update, (
                 interact_with_play_button,
                 interact_with_quit_button
-            ).run_if(in_state(AppState::Menu)),
+            ).run_if(in_state(AppState::Menu)))
+            .add_systems(Update, (
+                interact_with_play_button,
+                interact_with_quit_button
+            ).run_if(in_state(AppState::GameOver)),
             );
     }
 }

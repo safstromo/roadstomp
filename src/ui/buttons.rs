@@ -1,6 +1,7 @@
 use bevy::app::AppExit;
 use bevy::prelude::*;
 use crate::AppState;
+use crate::resources::{Lives, Score};
 use crate::ui::styles::*;
 
 
@@ -11,6 +12,8 @@ pub struct PlayButton;
 pub struct QuitButton;
 
 pub fn interact_with_play_button(
+    mut life: ResMut<Lives>,
+    mut score: ResMut<Score>,
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<PlayButton>),
@@ -21,6 +24,8 @@ pub fn interact_with_play_button(
         match *interaction {
             Interaction::Pressed => {
                 *background_color = PRESSED_BUTTON_COLOR.into();
+                life.lives = 5;
+                score.score = 0;
                 app_state_next_state.set(AppState::InGame);
             }
             Interaction::Hovered => {

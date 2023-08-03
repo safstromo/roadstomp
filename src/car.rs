@@ -17,7 +17,8 @@ impl Plugin for CarPlugin {
                 (spawn_car, apply_velocity)
                     .run_if(in_state(AppState::InGame))
                     .run_if(in_state(GameState::Running)),
-            );
+            )
+            .add_systems(OnExit(AppState::InGame), despawn_cars);
     }
 }
 
@@ -50,6 +51,15 @@ fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time_step: Res<
     for (mut transform, velocity) in &mut query {
         transform.translation.x += velocity.x * time_step.period.as_secs_f32();
         transform.translation.y += velocity.y * time_step.period.as_secs_f32();
+    }
+}
+
+fn despawn_cars(
+    mut commands: Commands,
+    cars_query: Query<Entity, With<Car>>,
+) {
+    for car in cars_query.iter() {
+        commands.entity(car).despawn();
     }
 }
 
