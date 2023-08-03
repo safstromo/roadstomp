@@ -1,7 +1,7 @@
 use crate::car::{Car, CAR_SIZE};
 use crate::events::CollisionEvent;
 use crate::player::Player;
-use crate::resources::Scoreboard;
+use crate::resources::{Lives, Score};
 use crate::{AppState, GameState, BOTTOM_WALL};
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb::collide;
@@ -21,7 +21,8 @@ impl Plugin for CollisionPlugin {
 
 fn check_for_collisions(
     mut commands: Commands,
-    mut scoreboard: ResMut<Scoreboard>,
+    mut scoreboard: ResMut<Score>,
+    mut lives: ResMut<Lives>,
     mut player_query: Query<(Entity, &Transform), With<Player>>,
     collider_query: Query<(Entity, &Transform), With<Car>>,
     mut collision_events: EventWriter<CollisionEvent>,
@@ -43,12 +44,13 @@ fn check_for_collisions(
         )
         .is_some()
         {
-            scoreboard.score += 1;
+            lives.lives -= 1;
             collision_events.send_default();
             commands.entity(car_entity).despawn();
         }
 
         if car_transform.translation.y <= BOTTOM_WALL - CAR_SIZE.y {
+            scoreboard.score += 1;
             commands.entity(car_entity).despawn();
         }
     }

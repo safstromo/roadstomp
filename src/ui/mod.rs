@@ -1,10 +1,12 @@
 mod menu;
 mod styles;
 mod buttons;
+mod hud;
 
 use bevy::prelude::*;
-use crate::AppState;
+use crate::{AppState};
 use crate::ui::buttons::*;
+use crate::ui::hud::{despawn_hud, spawn_hud, update_lives, update_score};
 use crate::ui::menu::*;
 
 #[derive(Component)]
@@ -18,12 +20,17 @@ impl Plugin for UiPlugin {
             .add_systems(Startup, spawn_game_background)
             .add_systems(OnEnter(AppState::Menu), spawn_menu)
             .add_systems(OnExit(AppState::Menu), despawn_menu)
-            .add_systems(Update, toggle_appstate)
-            .add_systems(Update,
-                         (
-                             interact_with_play_button,
-                             interact_with_quit_button
-                         ).run_if(in_state(AppState::Menu)),
+            .add_systems(OnEnter(AppState::InGame), spawn_hud)
+            .add_systems(OnExit(AppState::InGame), despawn_hud)
+            .add_systems(Update, (toggle_appstate, ))
+            .add_systems(Update, (
+                update_lives,
+                update_score
+            ).run_if(in_state(AppState::InGame)))
+            .add_systems(Update, (
+                interact_with_play_button,
+                interact_with_quit_button
+            ).run_if(in_state(AppState::Menu)),
             );
     }
 }
@@ -42,7 +49,7 @@ fn spawn_game_background(
     ));
 }
 
-fn despawn_game_background(
+fn _despawn_game_background(
     mut commands: Commands,
     menu_query: Query<Entity, With<GameBackground>>, ) {
     if let Ok(entity) = menu_query.get_single() {
