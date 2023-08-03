@@ -6,12 +6,10 @@ use crate::ui::styles::*;
 #[derive(Component)]
 pub struct Menu;
 
-
-
 pub fn spawn_menu(
     mut commands: Commands,
     asset_server: Res<AssetServer>, ) {
-    let menu_entity = build_menu(&mut commands, &asset_server);
+    build_menu(&mut commands, &asset_server);
 }
 
 pub fn despawn_menu(
@@ -57,17 +55,8 @@ fn build_menu(
                 }).with_children(|parent| {
                 //image
                 parent.spawn(
-                    ImageBundle {
-                        style: Style {
-                            width: Val::Px(32.0),
-                            height: Val::Px(32.0),
-                            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0), Val::Px(8.0)),
-                            ..default()
-                        },
-                        image: asset_server.load("chicken1.png").into(),
-                        ..default()
-                    });
-                //Text
+                    get_chicken_image_bundle(asset_server));
+                //Title text
                 parent.spawn(
                     TextBundle {
                         text: Text {
@@ -84,16 +73,7 @@ fn build_menu(
                     });
                 //image
                 parent.spawn(
-                    ImageBundle {
-                        style: Style {
-                            width: Val::Px(32.0),
-                            height: Val::Px(32.0),
-                            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0), Val::Px(8.0)),
-                            ..default()
-                        },
-                        image: asset_server.load("chicken1.png").into(),
-                        ..default()
-                    });
+                    get_chicken_image_bundle(asset_server));
             }
             );
             //playbutton
@@ -155,4 +135,3 @@ fn build_menu(
         .id();
     menu_entity
 }
-

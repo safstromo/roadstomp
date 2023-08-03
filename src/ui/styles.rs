@@ -30,3 +30,16 @@ pub fn get_title_text_style(asset_server: &Res<AssetServer>) -> TextStyle {
     }
 }
 
+pub fn get_chicken_image_bundle(asset_server: &Res<AssetServer>) -> ImageBundle {
+    ImageBundle {
+        style: Style {
+            width: Val::Px(32.0),
+            height: Val::Px(32.0),
+            margin: UiRect::new(Val::Px(8.0), Val::Px(8.0), Val::Px(8.0), Val::Px(8.0)),
+            ..default()
+        },
+        image: asset_server.load("chicken1.png").into(),
+        ..default()
+    }
+}
+

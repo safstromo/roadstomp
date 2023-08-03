@@ -7,15 +7,17 @@ use crate::AppState;
 use crate::ui::buttons::*;
 use crate::ui::menu::*;
 
+#[derive(Component)]
+struct GameBackground;
+
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_systems(Startup, spawn_game_background)
             .add_systems(OnEnter(AppState::Menu), spawn_menu)
             .add_systems(OnExit(AppState::Menu), despawn_menu)
-            .add_systems(Startup, spawn_game_background)
-            // .add_systems(OnExit(AppState::InGame), despawn_game_background)
             .add_systems(Update, toggle_appstate)
             .add_systems(Update,
                          (
@@ -25,8 +27,6 @@ impl Plugin for UiPlugin {
             );
     }
 }
-
-
 
 fn spawn_game_background(
     mut commands: Commands,
@@ -64,9 +64,3 @@ fn toggle_appstate(
         commands.insert_resource(NextState(Some(AppState::InGame)));
     }
 }
-
-#[derive(Component)]
-struct GameBackground;
-
-
-
