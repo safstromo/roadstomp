@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use crate::ui::buttons::{PlayButton, QuitButton};
+use crate::ui::hud::ScoreBoard;
 use crate::ui::styles::{BUTTON_STYLE, get_button_text_style, get_chicken_image_bundle, get_title_text_style, NORMAL_BUTTON_COLOR};
 
 #[derive(Component)]
@@ -38,7 +39,7 @@ fn build_gameover(commands: &mut Commands,
                 GameOver,
         ))
         .with_children(|parent| {
-            //title
+            //Hp Box
             parent.spawn(
                 NodeBundle {
                     style: Style {
@@ -50,47 +51,112 @@ fn build_gameover(commands: &mut Commands,
                         ..default()
                     },
                     ..default()
-                }).with_children(|parent| {
-                //image
-                parent.spawn(
-                    get_chicken_image_bundle(asset_server));
-                //Title text
-                parent.spawn(
-                    TextBundle {
-                        text: Text {
-                            sections: vec![
-                                TextSection::new(
-                                    "GAME OVER",
-                                    get_title_text_style(asset_server),
-                                )
-                            ],
-                            alignment: TextAlignment::Center,
-                            ..default()
-                        },
-                        ..default()
-                    });
-                //image
-                parent.spawn(
-                    get_chicken_image_bundle(asset_server));
-            }
-            );
-            //playbutton
-            parent.spawn(
-                (
-                    ButtonBundle {
-                        style: BUTTON_STYLE,
-                        background_color: NORMAL_BUTTON_COLOR.into(),
-                        ..default()
-                    },
-                    PlayButton,
-                )
+                }
             ).with_children(|parent| {
                 parent.spawn(
+                    (TextBundle::from_sections([
+                        TextSection::new(
+                            "Score: ",
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 64.0,
+                                color: Color::BLACK,
+                            },
+                        ),
+                        TextSection::from_style(
+                            TextStyle {
+                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                                font_size: 64.0,
+                                color: Color::BLACK,
+                                ..default()
+                            }
+                        ),
+                    ]),
+                     ScoreBoard
+                    ));
+            });
+        }).with_children(|parent| {
+        //title
+        parent.spawn(
+            NodeBundle {
+                style: Style {
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    width: Val::Px(300.0),
+                    height: Val::Px(120.0),
+                    ..default()
+                },
+                ..default()
+            }).with_children(|parent| {
+            //image
+            parent.spawn(
+                get_chicken_image_bundle(asset_server));
+            //Title text
+            parent.spawn(
+                TextBundle {
+                    text: Text {
+                        sections: vec![
+                            TextSection::new(
+                                "GAME OVER",
+                                get_title_text_style(asset_server),
+                            )
+                        ],
+                        alignment: TextAlignment::Center,
+                        ..default()
+                    },
+                    ..default()
+                });
+            //image
+            parent.spawn(
+                get_chicken_image_bundle(asset_server));
+        }
+        );
+        //playbutton
+        parent.spawn(
+            (
+                ButtonBundle {
+                    style: BUTTON_STYLE,
+                    background_color: NORMAL_BUTTON_COLOR.into(),
+                    ..default()
+                },
+                PlayButton,
+            )
+        ).with_children(|parent| {
+            parent.spawn(
+                TextBundle {
+                    text: Text {
+                        sections: vec![
+                            TextSection::new(
+                                "Restart",
+                                get_button_text_style(asset_server),
+                            )
+                        ],
+                        alignment: TextAlignment::Center,
+                        ..default()
+                    },
+                    ..default()
+                }
+            );
+        });
+        //quitbutton
+        parent.spawn(
+            (
+                ButtonBundle {
+                    style: BUTTON_STYLE,
+                    background_color: NORMAL_BUTTON_COLOR.into(),
+                    ..default()
+                },
+                QuitButton
+            )
+        )
+            .with_children(|parent| {
+                parent.spawn(
                     TextBundle {
                         text: Text {
                             sections: vec![
                                 TextSection::new(
-                                    "Restart",
+                                    "Quit",
                                     get_button_text_style(asset_server),
                                 )
                             ],
@@ -101,35 +167,7 @@ fn build_gameover(commands: &mut Commands,
                     }
                 );
             });
-            //quitbutton
-            parent.spawn(
-                (
-                    ButtonBundle {
-                        style: BUTTON_STYLE,
-                        background_color: NORMAL_BUTTON_COLOR.into(),
-                        ..default()
-                    },
-                    QuitButton
-                )
-            )
-                .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle {
-                            text: Text {
-                                sections: vec![
-                                    TextSection::new(
-                                        "Quit",
-                                        get_button_text_style(asset_server),
-                                    )
-                                ],
-                                alignment: TextAlignment::Center,
-                                ..default()
-                            },
-                            ..default()
-                        }
-                    );
-                });
-        })
+    })
         .id();
     gameover_entity
 }

@@ -1,4 +1,3 @@
-use bevy::app::AppExit;
 use bevy::prelude::*;
 use crate::{AppState, GameState};
 use crate::resources::{Lives, Score};

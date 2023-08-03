@@ -32,6 +32,9 @@ impl Plugin for UiPlugin {
                 update_score
             ).run_if(in_state(AppState::InGame)))
             .add_systems(Update, (
+                update_score
+            ).run_if(in_state(AppState::GameOver)))
+            .add_systems(Update, (
                 interact_with_play_button,
                 interact_with_quit_button
             ).run_if(in_state(AppState::Menu)))
