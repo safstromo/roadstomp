@@ -5,7 +5,6 @@ mod player;
 mod resources;
 mod sprites;
 mod ui;
-
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
