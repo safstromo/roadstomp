@@ -25,15 +25,7 @@ fn build_menu(
 ) -> Entity {
     let menu_entity = commands
         .spawn((NodeBundle {
-            style: Style {
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                row_gap: Val::Px(20.0),
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                ..default()
-            },
+            style: FULL_CENTER_COL,
             ..default()
         },
                 Menu,
@@ -42,14 +34,7 @@ fn build_menu(
             //title
             parent.spawn(
                 NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Row,
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        width: Val::Px(300.0),
-                        height: Val::Px(120.0),
-                        ..default()
-                    },
+                    style: CENTER_ROW,
                     ..default()
                 }).with_children(|parent| {
                 //image

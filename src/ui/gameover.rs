@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use crate::ui::buttons::{PlayButton, QuitButton};
-use crate::ui::hud::ScoreBoard;
-use crate::ui::styles::{BUTTON_STYLE,  get_chicken_image_bundle,  NORMAL_BUTTON_COLOR, spawn_button_text_box, spawn_title_box};
+use crate::ui::styles::{BUTTON_STYLE, CENTER_ROW, FULL_CENTER_COL, get_chicken_image_bundle, NORMAL_BUTTON_COLOR, spawn_button_text_box, spawn_end_score, spawn_title_box};
 
 #[derive(Component)]
 pub struct GameOver;
@@ -25,68 +24,26 @@ fn build_gameover(commands: &mut Commands,
 ) -> Entity {
     let gameover_entity = commands
         .spawn((NodeBundle {
-            style: Style {
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                row_gap: Val::Px(20.0),
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                ..default()
-            },
+            style: FULL_CENTER_COL,
             ..default()
         },
                 GameOver,
         ))
         .with_children(|parent| {
-            //Hp Box
+            //Final score
             parent.spawn(
                 NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Row,
-                        justify_content: JustifyContent::Center,
-                        align_items: AlignItems::Center,
-                        width: Val::Px(300.0),
-                        height: Val::Px(120.0),
-                        ..default()
-                    },
+                    style: CENTER_ROW,
                     ..default()
                 }
             ).with_children(|parent| {
-                parent.spawn(
-                    (TextBundle::from_sections([
-                        TextSection::new(
-                            "Score: ",
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 64.0,
-                                color: Color::BLACK,
-                            },
-                        ),
-                        TextSection::from_style(
-                            TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 64.0,
-                                color: Color::BLACK,
-                                ..default()
-                            }
-                        ),
-                    ]),
-                     ScoreBoard
-                    ));
+                spawn_end_score(asset_server, parent);
             });
         }).with_children(|parent| {
         //title
         parent.spawn(
             NodeBundle {
-                style: Style {
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    width: Val::Px(300.0),
-                    height: Val::Px(120.0),
-                    ..default()
-                },
+                style: CENTER_ROW,
                 ..default()
             }).with_children(|parent| {
             //image
@@ -130,6 +87,8 @@ fn build_gameover(commands: &mut Commands,
         .id();
     gameover_entity
 }
+
+
 
 
 

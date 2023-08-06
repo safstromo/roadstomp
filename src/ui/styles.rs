@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::ui::hud::ScoreBoard;
 
 pub const NORMAL_BUTTON_COLOR: Color = Color::BLACK;
 pub const HOVERED_BUTTON_COLOR: Color = Color::rgb(0.25, 0.25, 0.25);
@@ -12,6 +13,25 @@ pub const BUTTON_STYLE: Style = {
     style
 };
 
+pub const CENTER_ROW: Style = {
+    let mut style = Style::DEFAULT;
+    style.flex_direction = FlexDirection::Row;
+    style.justify_content = JustifyContent::Center;
+    style.align_items = AlignItems::Center;
+    style.width = Val::Px(300.0);
+    style.height = Val::Px(120.0);
+    style
+};
+pub const FULL_CENTER_COL: Style = {
+    let mut style = Style::DEFAULT;
+    style.flex_direction = FlexDirection::Column;
+    style.justify_content = JustifyContent::Center;
+    style.align_items = AlignItems::Center;
+    style.row_gap = Val::Px(20.0);
+    style.width = Val::Percent(100.0);
+    style.height = Val::Percent(100.0);
+    style
+};
 
 pub fn get_button_text_style(asset_server: &Res<AssetServer>) -> TextStyle {
     TextStyle {
@@ -75,4 +95,28 @@ pub fn spawn_title_box(asset_server: &Res<AssetServer>, parent: &mut ChildBuilde
             },
             ..default()
         });
+}
+
+pub fn spawn_end_score(asset_server: &Res<AssetServer>, parent: &mut ChildBuilder) {
+    parent.spawn(
+        (TextBundle::from_sections([
+            TextSection::new(
+                "Score: ",
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 64.0,
+                    color: Color::BLACK,
+                },
+            ),
+            TextSection::from_style(
+                TextStyle {
+                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                    font_size: 64.0,
+                    color: Color::BLACK,
+                    ..default()
+                }
+            ),
+        ]),
+         ScoreBoard
+        ));
 }
