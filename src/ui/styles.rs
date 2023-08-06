@@ -43,3 +43,20 @@ pub fn get_chicken_image_bundle(asset_server: &Res<AssetServer>) -> ImageBundle 
     }
 }
 
+pub fn spawn_button_text_box(asset_server: &Res<AssetServer>, parent: &mut ChildBuilder, text: &str) {
+    parent.spawn(
+        TextBundle {
+            text: Text {
+                sections: vec![
+                    TextSection::new(
+                        text,
+                        get_button_text_style(asset_server),
+                    )
+                ],
+                alignment: TextAlignment::Center,
+                ..default()
+            },
+            ..default()
+        }
+    );
+}

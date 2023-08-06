@@ -87,21 +87,7 @@ fn build_menu(
                     PlayButton,
                 )
             ).with_children(|parent| {
-                parent.spawn(
-                    TextBundle {
-                        text: Text {
-                            sections: vec![
-                                TextSection::new(
-                                    "Play",
-                                    get_button_text_style(asset_server),
-                                )
-                            ],
-                            alignment: TextAlignment::Center,
-                            ..default()
-                        },
-                        ..default()
-                    }
-                );
+               spawn_button_text_box(asset_server,parent, "Play") 
             });
             //quitbutton
             parent.spawn(
@@ -115,23 +101,11 @@ fn build_menu(
                 )
             )
                 .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle {
-                            text: Text {
-                                sections: vec![
-                                    TextSection::new(
-                                        "Quit",
-                                        get_button_text_style(asset_server),
-                                    )
-                                ],
-                                alignment: TextAlignment::Center,
-                                ..default()
-                            },
-                            ..default()
-                        }
-                    );
+                    spawn_button_text_box(asset_server, parent, "Quit");
                 });
         })
         .id();
     menu_entity
 }
+
+
