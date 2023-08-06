@@ -13,7 +13,6 @@ pub const BUTTON_STYLE: Style = {
 };
 
 
-
 pub fn get_button_text_style(asset_server: &Res<AssetServer>) -> TextStyle {
     TextStyle {
         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
@@ -59,4 +58,21 @@ pub fn spawn_button_text_box(asset_server: &Res<AssetServer>, parent: &mut Child
             ..default()
         }
     );
+}
+
+pub fn spawn_title_box(asset_server: &Res<AssetServer>, parent: &mut ChildBuilder, text: &str) {
+    parent.spawn(
+        TextBundle {
+            text: Text {
+                sections: vec![
+                    TextSection::new(
+                        text,
+                        get_title_text_style(asset_server),
+                    )
+                ],
+                alignment: TextAlignment::Center,
+                ..default()
+            },
+            ..default()
+        });
 }

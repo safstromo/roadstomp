@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::ui::buttons::{PlayButton, QuitButton};
 use crate::ui::hud::ScoreBoard;
-use crate::ui::styles::{BUTTON_STYLE, get_button_text_style, get_chicken_image_bundle, get_title_text_style, NORMAL_BUTTON_COLOR, spawn_button_text_box};
+use crate::ui::styles::{BUTTON_STYLE,  get_chicken_image_bundle,  NORMAL_BUTTON_COLOR, spawn_button_text_box, spawn_title_box};
 
 #[derive(Component)]
 pub struct GameOver;
@@ -93,20 +93,7 @@ fn build_gameover(commands: &mut Commands,
             parent.spawn(
                 get_chicken_image_bundle(asset_server));
             //Title text
-            parent.spawn(
-                TextBundle {
-                    text: Text {
-                        sections: vec![
-                            TextSection::new(
-                                "GAME OVER",
-                                get_title_text_style(asset_server),
-                            )
-                        ],
-                        alignment: TextAlignment::Center,
-                        ..default()
-                    },
-                    ..default()
-                });
+            spawn_title_box(asset_server, parent, "Game Over");
             //image
             parent.spawn(
                 get_chicken_image_bundle(asset_server));
@@ -123,7 +110,7 @@ fn build_gameover(commands: &mut Commands,
                 PlayButton,
             )
         ).with_children(|parent| {
-         spawn_button_text_box(asset_server, parent, "Restart")
+            spawn_button_text_box(asset_server, parent, "Restart")
         });
         //quitbutton
         parent.spawn(
@@ -137,11 +124,13 @@ fn build_gameover(commands: &mut Commands,
             )
         )
             .with_children(|parent| {
-              spawn_button_text_box(asset_server, parent, "Quit")
+                spawn_button_text_box(asset_server, parent, "Quit")
             });
     })
         .id();
     gameover_entity
 }
+
+
 
 

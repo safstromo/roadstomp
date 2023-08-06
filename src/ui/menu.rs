@@ -1,4 +1,3 @@
-
 use bevy::prelude::*;
 use crate::ui::buttons::{PlayButton, QuitButton};
 use crate::ui::styles::*;
@@ -57,20 +56,7 @@ fn build_menu(
                 parent.spawn(
                     get_chicken_image_bundle(asset_server));
                 //Title text
-                parent.spawn(
-                    TextBundle {
-                        text: Text {
-                            sections: vec![
-                                TextSection::new(
-                                    "RoadStomp",
-                                    get_title_text_style(asset_server),
-                                )
-                            ],
-                            alignment: TextAlignment::Center,
-                            ..default()
-                        },
-                        ..default()
-                    });
+                spawn_title_box(asset_server, parent, "RoadStomp");
                 //image
                 parent.spawn(
                     get_chicken_image_bundle(asset_server));
@@ -87,7 +73,7 @@ fn build_menu(
                     PlayButton,
                 )
             ).with_children(|parent| {
-               spawn_button_text_box(asset_server,parent, "Play") 
+                spawn_button_text_box(asset_server, parent, "Play")
             });
             //quitbutton
             parent.spawn(
