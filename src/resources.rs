@@ -11,13 +11,22 @@ pub struct Lives {
 }
 
 #[derive(Resource)]
+pub struct CarSpeed {
+    pub speed: f32,
+}
+
+#[derive(Resource)]
 pub struct SpawnTimer(pub Timer);
+
+#[derive(Resource)]
+pub struct DifficultyTimer(pub Timer);
 
 #[derive(Resource)]
 pub struct CountdownTimer {
     pub(crate) timer: Timer,
     pub(crate) duration: u8,
 }
+
 impl CountdownTimer {
     pub fn new() -> Self {
         Self {
@@ -32,3 +41,5 @@ impl Default for CountdownTimer {
         Self::new()
     }
 }
+
+

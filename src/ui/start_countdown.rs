@@ -1,8 +1,12 @@
-use std::time::Duration;
 use bevy::prelude::*;
+
 use crate::GameState;
-use crate::resources::{CountdownTimer};
-use crate::ui::styles::{CENTER_ROW, FULL_CENTER_COL, spawn_title_box};
+use crate::resources::CountdownTimer;
+use crate::ui::styles::spawn_title_box;
+
+#[derive(Component, Debug)]
+pub struct Countdown;
+
 
 pub fn countdown(
     mut commands: Commands,
@@ -14,19 +18,19 @@ pub fn countdown(
     timer.timer.tick(time.delta());
     if timer.timer.just_finished() {
         if timer.duration == 4 {
-            let tree = spawn_countdown(&mut commands, &asset_server, "3..");
+            spawn_countdown(&mut commands, &asset_server, "3..");
         } else if timer.duration == 3 {
-            despawn_countdownq(&mut commands, &countdown_query);
-            let two = spawn_countdown(&mut commands, &asset_server, "2..");
+            despawn_countdown(&mut commands, &countdown_query);
+            spawn_countdown(&mut commands, &asset_server, "2..");
         } else if timer.duration == 2 {
-            despawn_countdownq(&mut commands, &countdown_query);
-            let one = spawn_countdown(&mut commands, &asset_server, "1..");
+            despawn_countdown(&mut commands, &countdown_query);
+            spawn_countdown(&mut commands, &asset_server, "1..");
         } else if timer.duration == 1 {
-            despawn_countdownq(&mut commands, &countdown_query);
-            let go = spawn_countdown(&mut commands, &asset_server, "GO..");
+            despawn_countdown(&mut commands, &countdown_query);
+            spawn_countdown(&mut commands, &asset_server, "GO..");
             commands.insert_resource(NextState(Some(GameState::Running)));
         } else if timer.duration == 0 {
-            despawn_countdownq(&mut commands, &countdown_query);
+            despawn_countdown(&mut commands, &countdown_query);
         }
         if timer.duration != 0 {
             timer.duration -= 1;
@@ -34,7 +38,7 @@ pub fn countdown(
     }
 }
 
-fn spawn_countdown(mut commands: &mut Commands, asset_server: &Res<AssetServer>, countdown: &str) -> Entity {
+fn spawn_countdown(commands: &mut Commands, asset_server: &Res<AssetServer>, countdown: &str) -> Entity {
     let countdown = commands
         .spawn((NodeBundle {
             style: Style {
@@ -51,30 +55,18 @@ fn spawn_countdown(mut commands: &mut Commands, asset_server: &Res<AssetServer>,
                 Countdown,
         ))
         .with_children(|parent| {
-                spawn_title_box(asset_server, parent, countdown);
-            })
+            spawn_title_box(asset_server, parent, countdown);
+        })
 
         .id();
     countdown
 }
 
 //can refactor to a single despawn!!
-pub fn despawn_countdownq(
-    mut commands: &mut Commands,
+pub fn despawn_countdown(
+    commands: &mut Commands,
     countdown_query: &Query<Entity, With<Countdown>>, ) {
     if let Ok(countdown_entity) = countdown_query.get_single() {
         commands.entity(countdown_entity).despawn_recursive();
     }
 }
-
-pub fn despawn_countdown(
-    mut commands: Commands,
-    countdown_query: Query<Entity, With<Countdown>>, ) {
-    if let Ok(countdown_entity) = countdown_query.get_single() {
-        commands.entity(countdown_entity).despawn_recursive();
-    }
-}
-
-#[derive(Component, Debug)]
-pub struct Countdown;
-

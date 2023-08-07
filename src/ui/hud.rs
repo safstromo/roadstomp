@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::{AppState, GameState};
 use crate::resources::{Lives, Score};
-use crate::ui::styles::{get_button_text_style, get_hud_text_style};
+use crate::ui::styles::{get_hud_text_style};
 
 #[derive(Component)]
 pub struct Hud;
@@ -96,41 +96,6 @@ fn build_hud(
                     ));
             });
         })
-        //ScoreBox
-        // .with_children(|parent| {
-        //     //Hp Box
-        //     parent.spawn(
-        //         NodeBundle {
-        //             style: Style {
-        //                 flex_direction: FlexDirection::Row,
-        //                 justify_content: JustifyContent::Center,
-        //                 align_items: AlignItems::Center,
-        //                 width: Val::Px(300.0),
-        //                 height: Val::Px(120.0),
-        //                 ..default()
-        //             },
-        //             ..default()
-        //         }
-        //     )
-        //         .with_children(|parent| {
-        //         parent.spawn(
-        //             (TextBundle::from_sections([
-        //                 TextSection::new(
-        //                     "Score: ",
-        //                     get_button_text_style(asset_server),
-        //                 ),
-        //                 TextSection::from_style(
-        //                     TextStyle {
-        //                         font_size: 32.0,
-        //                         color: Color::RED,
-        //                         ..default()
-        //                     }
-        //                 ),
-        //             ]),
-        //              ScoreBoard
-        //             ));
-        //     })
-        // // })
         .id();
     hud
 }

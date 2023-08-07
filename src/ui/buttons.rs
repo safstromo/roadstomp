@@ -1,7 +1,8 @@
 use bevy::app::AppExit;
 use bevy::prelude::*;
 use crate::AppState;
-use crate::resources::{CountdownTimer, Lives, Score};
+use crate::car::INITIAL_CAR_SPEED;
+use crate::resources::{CarSpeed, CountdownTimer, Lives, Score};
 use crate::ui::styles::*;
 
 
@@ -15,6 +16,7 @@ pub fn interact_with_play_button(
     mut life: ResMut<Lives>,
     mut countdown: ResMut<CountdownTimer>,
     mut score: ResMut<Score>,
+    mut car_speed: ResMut<CarSpeed>,
     mut button_query: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<PlayButton>),
@@ -27,6 +29,7 @@ pub fn interact_with_play_button(
                 *background_color = PRESSED_BUTTON_COLOR.into();
                 life.lives = 5;
                 score.score = 0;
+                car_speed.speed = INITIAL_CAR_SPEED;
                 countdown.duration = 4;
                 app_state_next_state.set(AppState::InGame);
             }

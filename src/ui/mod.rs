@@ -6,13 +6,13 @@ mod gameover;
 mod start_countdown;
 
 use bevy::prelude::*;
-use crate::{AppState, GameState};
-use crate::resources::{CountdownTimer, };
+use crate::{AppState};
+use crate::resources::{CountdownTimer};
 use crate::ui::buttons::*;
 use crate::ui::gameover::{despawn_gameover, spawn_gameover};
 use crate::ui::hud::{despawn_hud, spawn_hud, update_lives, update_score};
 use crate::ui::menu::*;
-use crate::ui::start_countdown::{countdown, Countdown, despawn_countdown};
+use crate::ui::start_countdown::{countdown};
 
 #[derive(Component)]
 struct GameBackground;
@@ -23,12 +23,10 @@ impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app
             .init_resource::<CountdownTimer>()
-            //.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Repeating)))
             .add_systems(Startup, spawn_game_background)
             .add_systems(OnEnter(AppState::Menu), spawn_menu)
             .add_systems(OnExit(AppState::Menu), despawn_menu)
-            .add_systems(OnEnter(AppState::InGame), (spawn_hud))
-            //.add_systems(OnEnter(GameState::Running), despawn_countdown)
+            .add_systems(OnEnter(AppState::InGame), spawn_hud)
             .add_systems(OnExit(AppState::InGame), despawn_hud)
             .add_systems(OnEnter(AppState::GameOver), spawn_gameover)
             .add_systems(OnExit(AppState::GameOver), despawn_gameover)

@@ -2,10 +2,10 @@ use crate::collisions::Collider;
 use crate::{AppState, GameState, LEFT_WALL, RIGHT_WALL, TOP_WALL};
 use bevy::prelude::*;
 use rand::Rng;
-use crate::resources::SpawnTimer;
+use crate::resources::{CarSpeed, DifficultyTimer, SpawnTimer};
 
 const INITIAL_CAR_DIRECTION: Vec2 = Vec2::new(0.0, -0.5);
-const CAR_SPEED: f32 = 400.0;
+pub const INITIAL_CAR_SPEED: f32 = 400.0;
 pub const CAR_SIZE: Vec2 = Vec2::new(20.0, 50.0);
 
 pub struct CarPlugin;
@@ -13,9 +13,11 @@ pub struct CarPlugin;
 impl Plugin for CarPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(SpawnTimer(Timer::from_seconds(0.1, TimerMode::Repeating)))
+            .insert_resource(DifficultyTimer(Timer::from_seconds(1.0, TimerMode::Repeating)))
+            .insert_resource(CarSpeed { speed: INITIAL_CAR_SPEED })
             .add_systems(
                 FixedUpdate,
-                (spawn_car, apply_velocity)
+                (spawn_car, apply_velocity, increase_difficulty)
                     .run_if(in_state(AppState::InGame))
                     .run_if(in_state(GameState::Running)),
             )
@@ -27,6 +29,7 @@ fn spawn_car(
     mut commands: Commands,
     time: Res<Time>,
     mut timer: ResMut<SpawnTimer>,
+    carspeed: Res<CarSpeed>,
     asset_server: Res<AssetServer>,
 ) {
     let mut rng = rand::thread_rng();
@@ -42,7 +45,7 @@ fn spawn_car(
                 ..default()
             },
             Car,
-            Velocity(INITIAL_CAR_DIRECTION.normalize() * CAR_SPEED),
+            Velocity(INITIAL_CAR_DIRECTION.normalize() * carspeed.speed),
             Collider,
         ));
     }
@@ -52,6 +55,18 @@ fn apply_velocity(mut query: Query<(&mut Transform, &Velocity)>, time_step: Res<
     for (mut transform, velocity) in &mut query {
         transform.translation.x += velocity.x * time_step.period.as_secs_f32();
         transform.translation.y += velocity.y * time_step.period.as_secs_f32();
+    }
+}
+
+fn increase_difficulty(
+    time: Res<Time>,
+    mut timer: ResMut<DifficultyTimer>,
+    mut car_speed: ResMut<CarSpeed>,
+) {
+    timer.0.tick(time.delta());
+
+    if timer.0.just_finished() {
+        car_speed.speed += 20.0;
     }
 }
 
