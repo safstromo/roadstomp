@@ -2,6 +2,7 @@ use crate::collisions::Collider;
 use crate::{AppState, GameState, LEFT_WALL, RIGHT_WALL, TOP_WALL};
 use bevy::prelude::*;
 use rand::Rng;
+use crate::resources::SpawnTimer;
 
 const INITIAL_CAR_DIRECTION: Vec2 = Vec2::new(0.0, -0.5);
 const CAR_SPEED: f32 = 400.0;
@@ -69,5 +70,3 @@ pub struct Velocity(pub Vec2);
 #[derive(Component, Debug)]
 pub struct Car;
 
-#[derive(Resource)]
-struct SpawnTimer(Timer);

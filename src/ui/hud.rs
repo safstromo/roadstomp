@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::{AppState, GameState};
 use crate::resources::{Lives, Score};
-use crate::ui::styles::get_button_text_style;
+use crate::ui::styles::{get_button_text_style, get_hud_text_style};
 
 #[derive(Component)]
 pub struct Hud;
@@ -34,9 +34,9 @@ fn build_hud(
     let hud = commands.spawn(
         (NodeBundle {
             style: Style {
-                flex_direction: FlexDirection::Row,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Start,
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Center,
                 row_gap: Val::Px(20.0),
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
@@ -52,9 +52,10 @@ fn build_hud(
                 NodeBundle {
                     style: Style {
                         flex_direction: FlexDirection::Row,
-                        justify_content: JustifyContent::Start,
-                        align_items: AlignItems::Start,
-                        width: Val::Px(300.0),
+                        justify_content: JustifyContent::SpaceAround,
+                        align_items: AlignItems::Center,
+                        row_gap: Val::Px(120.0),
+                        width: Val::Px(600.0),
                         height: Val::Px(120.0),
                         ..default()
                     },
@@ -65,11 +66,11 @@ fn build_hud(
                     (TextBundle::from_sections([
                         TextSection::new(
                             "Lives: ",
-                            get_button_text_style(asset_server),
+                            get_hud_text_style(asset_server),
                         ),
                         TextSection::from_style(
                             TextStyle {
-                                font_size: 32.0,
+                                font_size: 64.0,
                                 color: Color::RED,
                                 ..default()
                             }
@@ -77,33 +78,15 @@ fn build_hud(
                     ]),
                      LifeBox
                     ));
-            });
-        })
-        //ScoreBox
-        .with_children(|parent| {
-            //Hp Box
-            parent.spawn(
-                NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Row,
-                        justify_content: JustifyContent::End,
-                        align_items: AlignItems::Start,
-                        width: Val::Px(300.0),
-                        height: Val::Px(120.0),
-                        ..default()
-                    },
-                    ..default()
-                }
-            ).with_children(|parent| {
                 parent.spawn(
                     (TextBundle::from_sections([
                         TextSection::new(
                             "Score: ",
-                            get_button_text_style(asset_server),
+                            get_hud_text_style(asset_server),
                         ),
                         TextSection::from_style(
                             TextStyle {
-                                font_size: 32.0,
+                                font_size: 64.0,
                                 color: Color::RED,
                                 ..default()
                             }
@@ -113,6 +96,41 @@ fn build_hud(
                     ));
             });
         })
+        //ScoreBox
+        // .with_children(|parent| {
+        //     //Hp Box
+        //     parent.spawn(
+        //         NodeBundle {
+        //             style: Style {
+        //                 flex_direction: FlexDirection::Row,
+        //                 justify_content: JustifyContent::Center,
+        //                 align_items: AlignItems::Center,
+        //                 width: Val::Px(300.0),
+        //                 height: Val::Px(120.0),
+        //                 ..default()
+        //             },
+        //             ..default()
+        //         }
+        //     )
+        //         .with_children(|parent| {
+        //         parent.spawn(
+        //             (TextBundle::from_sections([
+        //                 TextSection::new(
+        //                     "Score: ",
+        //                     get_button_text_style(asset_server),
+        //                 ),
+        //                 TextSection::from_style(
+        //                     TextStyle {
+        //                         font_size: 32.0,
+        //                         color: Color::RED,
+        //                         ..default()
+        //                     }
+        //                 ),
+        //             ]),
+        //              ScoreBoard
+        //             ));
+        //     })
+        // // })
         .id();
     hud
 }

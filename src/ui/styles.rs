@@ -45,7 +45,7 @@ pub fn get_title_text_style(asset_server: &Res<AssetServer>) -> TextStyle {
     TextStyle {
         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
         font_size: 64.0,
-        color: Color::WHITE,
+        color: Color::BLACK,
     }
 }
 
@@ -119,4 +119,12 @@ pub fn spawn_end_score(asset_server: &Res<AssetServer>, parent: &mut ChildBuilde
         ]),
          ScoreBoard
         ));
+}
+
+pub fn get_hud_text_style(asset_server: &Res<AssetServer>) -> TextStyle {
+    TextStyle {
+        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+        font_size: 64.0,
+        color: Color::BLACK,
+    }
 }
